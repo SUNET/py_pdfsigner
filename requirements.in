@@ -1,4 +1,5 @@
 uvicorn[standard]
+gunicorn
 pyhanko
 fastapi
 asyncpg
@@ -12,3 +13,4 @@ importlib-metadata
 exceptiongroup
 setuptools
 python-pkcs11
+pynsq

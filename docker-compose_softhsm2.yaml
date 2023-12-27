@@ -1,0 +1,25 @@
+---
+version: "3"
+
+services:
+  pdfsigner:
+    container_name: "vc_pdfsigner"
+    image: docker.sunet.se/dc4eu/py_pdfsigner_softhsm2:latest
+    restart: always
+    volumes:
+      - ./dev_config.yaml:/config.yaml:ro
+      - /var/log/sunet:/var/log/sunet
+    networks:
+      - signer-net
+    environment:
+      - "CONFIG_YAML=config.yaml"
+
+networks:
+  signer-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-signer
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.60.0/24

@@ -17,12 +17,28 @@ update_deps:
 test:
 	PYTHONPATH=$(SRCDIR) pytest -vvv -ra --log-cli-level DEBUG
 
+start:
+	$(info Run!)
+	docker-compose -f docker-compose.yaml up -d --remove-orphans
+
+stop:
+	$(info stopping VC)
+	docker-compose -f docker-compose.yaml rm -s -f
+
+start_with_softhsm2:
+	$(info Run with SoftHSM2!)
+	docker-compose -f docker-compose.yaml -f docker-compose_softhsm2.yaml up -d --remove-orphans
+
+hard_restart: stop start
 
 ifndef VERSION
 VERSION := latest                                                                                                                                                                                                                              
 endif
 
-DOCKER_PDFSIGNER 		:= docker.sunet.se/dc4eu/py_pdfsigner:$(VERSION)
+DOCKER_PDFSIGNER 					:= docker.sunet.se/dc4eu/py_pdfsigner:$(VERSION)
+DOCKER_PDFSIGNER_EXTERNAL_PKCS11 	:= docker.sunet.se/dc4eu/py_pdfsigner_external_pkcs11:$(VERSION)
+DOCKER_PDFSIGNER_SOFTHSM2 			:= docker.sunet.se/dc4eu/py_pdfsigner_softhsm2:$(VERSION)
+DOCKER_PDFSIGNER_USB				:= docker.sunet.se/dc4eu/py_pdfsigner_usb:$(VERSION)
 
 reformat:
 	isort --line-width 120 --atomic --project python_x509_pkcs11 $(SOURCE)
@@ -51,9 +67,24 @@ docker-build-pdfsigner:
 	$(info building docker image $(DOCKER_PDFSIGNER) )
 	docker build --tag $(DOCKER_PDFSIGNER) --file Dockerfile .
 
+docker-build-external_pkcs11:
+	$(info building docker image $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) )
+	docker build --tag $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) --file dockerfiles/external_pkcs11/Dockerfile .
+
+docker-build-softhsm2:
+	$(info building docker image $(DOCKER_PDFSIGNER_SOFTHSM2) )
+	docker build --tag $(DOCKER_PDFSIGNER_SOFTHSM2) --file dockerfiles/softhsm2/Dockerfile .
+
+docker-build-usb:
+	$(info building docker image $(DOCKER_PDFSIGNER_USB) )
+	docker build --tag $(DOCKER_PDFSIGNER_USB) --file dockerfiles/usb/Dockerfile .
+
 docker-push:
 	$(info Pushing docker images)
 	docker push $(DOCKER_PDFSIGNER)
+	docker push $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11)
+	docker push $(DOCKER_PDFSIGNER_SOFTHSM2)
+	docker push $(DOCKER_PDFSIGNER_USB)
 
 
 hard_restart: stop start
