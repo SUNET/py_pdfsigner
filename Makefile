@@ -22,12 +22,16 @@ start:
 	docker-compose -f docker-compose.yaml up -d --remove-orphans
 
 stop:
-	$(info stopping VC)
+	$(info stopping)
 	docker-compose -f docker-compose.yaml rm -s -f
 
-start_with_softhsm2:
-	$(info Run with SoftHSM2!)
-	docker-compose -f docker-compose.yaml -f docker-compose_softhsm2.yaml up -d --remove-orphans
+start_dev:
+	$(info Run dev!)
+	docker-compose -f docker-compose.yaml -f docker-compose_dev.yaml up -d --remove-orphans
+
+stop_dev:
+	$(info stopping dev)
+	docker-compose -f docker-compose_dev.yaml rm -s -f
 
 hard_restart: stop start
 
@@ -37,7 +41,7 @@ endif
 
 DOCKER_PDFSIGNER 					:= docker.sunet.se/dc4eu/py_pdfsigner:$(VERSION)
 DOCKER_PDFSIGNER_EXTERNAL_PKCS11 	:= docker.sunet.se/dc4eu/py_pdfsigner_external_pkcs11:$(VERSION)
-DOCKER_PDFSIGNER_SOFTHSM2 			:= docker.sunet.se/dc4eu/py_pdfsigner_softhsm2:$(VERSION)
+DOCKER_PDFSIGNER_DEV 				:= docker.sunet.se/dc4eu/py_pdfsigner_dev:$(VERSION)
 DOCKER_PDFSIGNER_USB				:= docker.sunet.se/dc4eu/py_pdfsigner_usb:$(VERSION)
 
 reformat:
@@ -62,6 +66,8 @@ new_softhsm:
 	$(info New SoftHSM)
 	softhsm2-util --init-token --slot 0 --label $(PKCS11_TOKEN) --pin $(PKCS11_PIN) --so-pin $(PKCS11_PIN)
 
+pkcs11-list:
+	pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -L --pin 1234 -T -O -I
 
 docker-build-pdfsigner:
 	$(info building docker image $(DOCKER_PDFSIGNER) )
@@ -71,9 +77,9 @@ docker-build-external_pkcs11:
 	$(info building docker image $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) )
 	docker build --tag $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) --file dockerfiles/external_pkcs11/Dockerfile .
 
-docker-build-softhsm2:
-	$(info building docker image $(DOCKER_PDFSIGNER_SOFTHSM2) )
-	docker build --tag $(DOCKER_PDFSIGNER_SOFTHSM2) --file dockerfiles/softhsm2/Dockerfile .
+docker-build-dev:
+	$(info building docker image $(DOCKER_PDFSIGNER_DEV) )
+	docker build --tag $(DOCKER_PDFSIGNER_DEV) --file dockerfiles/dev/Dockerfile .
 
 docker-build-usb:
 	$(info building docker image $(DOCKER_PDFSIGNER_USB) )
@@ -83,11 +89,12 @@ docker-push:
 	$(info Pushing docker images)
 	docker push $(DOCKER_PDFSIGNER)
 	docker push $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11)
-	docker push $(DOCKER_PDFSIGNER_SOFTHSM2)
+	docker push $(DOCKER_PDFSIGNER_DEV)
 	docker push $(DOCKER_PDFSIGNER_USB)
 
 
 hard_restart: stop start
+hard_restart_dev: stop_dev start_dev
 
 docker-unit-test: docker-build-test
 	$(info Run unit tests)
@@ -105,6 +112,7 @@ import_pki_into_hsm:
 	$(info Import pki into HSM)
 	python3 developer_tools/import_pki_into_hsm.py
 
+
 vscode_venv:
 	$(info Creating virtualenv in devcontainer)
 	python3 -m venv .venv
@@ -119,7 +127,7 @@ vscode_pip: vscode_venv
 vscode_packages:
 	$(info Installing apt packages in devcontainer)
 	sudo apt-get update
-	sudo apt install -y docker.io softhsm2
+	sudo apt install -y docker.io softhsm2 opensc
 
 # This target is used by the devcontainer.json to configure the devcontainer
 vscode: vscode_packages vscode_pip sync_deps

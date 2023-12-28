@@ -45,7 +45,7 @@ class PDFSIGNERAPP(FastAPI):
     def init_pkcs11_session(self) -> None:
         self.logger.info("init pkcs11 session")
         try:
-            self.session:Session = open_pkcs11_session(
+            self.session = open_pkcs11_session(
                 lib_location=self.config.pkcs11_module, 
                 slot_no=self.config.pkcs11_slot, 
                 token_label=self.config.pkcs11_label,
@@ -53,9 +53,6 @@ class PDFSIGNERAPP(FastAPI):
             )
         except UserAlreadyLoggedIn:
             self.logger.info("pkcs11 user already logged in!")
-
-        print("key", self.session.get_key(label=self.config.pkcs11_key_label))
-
 
 def init_app(service_name: str = "py_pdfsigner") -> PDFSIGNERAPP:
     """init pdf signing app"""

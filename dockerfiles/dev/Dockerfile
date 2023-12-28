@@ -1,9 +1,5 @@
 FROM debian:stable
 
-
-
-RUN addgroup --system sunet && adduser --system --shell /bin/false --ingroup sunet sunet
-
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y \
@@ -24,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     bind9-host \
     procps \
     opensc-pkcs11 \
+    opensc \
     usbutils \
     libpcsclite1 \
     libgdk-pixbuf2.0-0 \
@@ -36,24 +33,14 @@ RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/sunet
 COPY requirements.txt ./
 COPY src ./src
-COPY dockerfiles/start.sh ./
-COPY dockerfiles/softhsm2/create_and_import_pki.sh ./
+COPY dockerfiles/start_dev.sh ./
+COPY dockerfiles/dev/create_and_import_pki.sh ./
 
 RUN python3 -mvenv /opt/sunet/venv
 RUN /opt/sunet/venv/bin/pip install --upgrade pip wheel
 RUN /opt/sunet/venv/bin/pip install --index-url https://pypi.sunet.se/simple -r /opt/sunet/requirements.txt
 
-
-RUN cd /tmp/ && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-RUN dpkg -i /tmp/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-
-RUN cd /tmp/ && wget https://www.globalsign.com/en/safenet-drivers/USB/10.7/Safenet_Linux_Installer_DEB_x64.zip
-RUN unzip /tmp/Safenet_Linux_Installer_DEB_x64.zip -d /tmp/
-RUN dpkg -i /tmp/safenetauthenticationclient_10.7.77_amd64.deb
-
-RUN mkdir -p /var/log/sunet && chown sunet: /var/log/sunet && chmod 770 /var/log/sunet
-
-RUN /opt/sunet/create_and_import_pki.sh
+RUN mkdir -p /var/log/sunet && chmod 770 /var/log/sunet
 
 EXPOSE 8080
 
@@ -61,4 +48,4 @@ HEALTHCHECK --interval=27s CMD curl --max-time 20 http://localhost:8080/status |
 
 ENTRYPOINT [ "/bin/bash"]
 
-CMD [ "/opt/sunet/start.sh" ]
+CMD [ "/opt/sunet/start_dev.sh" ]

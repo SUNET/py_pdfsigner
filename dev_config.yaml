@@ -1,8 +1,9 @@
 ---
 
 py_pdfsigner:
-  pkcs11_label: "test"
-  pkcs11_pin: "test"
-  pkcs11_module: "test"
-  pkcs11_key_label: "test"
-  pkcs11_cert_label: "test"
+  pkcs11_pin: "1234"
+  pkcs11_module: "/usr/lib/softhsm/libsofthsm2.so"
+  pkcs11_label: "test_label"
+  pkcs11_key_label: "test_key_label"
+  pkcs11_cert_label: "test_cert_label"
+  #pkcs11_slot: 0

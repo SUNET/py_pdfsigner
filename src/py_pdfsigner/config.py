@@ -12,7 +12,7 @@ class CFG(BaseModel):
     pkcs11_module: str
     pkcs11_key_label: Optional[str] = None
     pkcs11_cert_label: Optional[str] = None
-    pkcs11_slot: int
+    pkcs11_slot: Optional[int] = None
 
 def parse(log: Logger) -> CFG:
     file_name = os.getenv("CONFIG_YAML")
