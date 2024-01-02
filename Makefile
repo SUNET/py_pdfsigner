@@ -127,7 +127,7 @@ vscode_pip: vscode_venv
 vscode_packages:
 	$(info Installing apt packages in devcontainer)
 	sudo apt-get update
-	sudo apt install -y docker.io softhsm2 opensc
+	sudo apt install -y docker.io softhsm2 opensc libsnappy-dev
 
 # This target is used by the devcontainer.json to configure the devcontainer
 vscode: vscode_packages vscode_pip sync_deps

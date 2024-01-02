@@ -21,7 +21,7 @@ set -e
 
 
 
-app_entrypoint="py_pdfsigner.run:api"
+app_entrypoint="py_pdfsigner.queue"
 app_name="py_pdfsigner"
 base_dir="/opt/sunet"
 project_dir="${base_dir}/src"
@@ -41,16 +41,21 @@ export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}/opt/sunet/venv"
 echo ""
 echo "$0: Starting ${app_name}"
 
+#exec start-stop-daemon --start -c root:root --exec \
+#     /opt/sunet/venv/bin/gunicorn \
+#     --pidfile "${state_dir}/${app_name}.pid" -- \
+#     --bind 0.0.0.0:8080 \
+#     --workers "${workers}" \
+#     --worker-class "${worker_class}" \
+#     --threads "${worker_threads}" \
+#     --timeout "${worker_timeout}" \
+#     --access-logfile "${log_dir}/${app_name}-access.log" \
+#     --error-logfile "${log_dir}/${app_name}-error.log" \
+#     --capture-output \
+#      -k uvicorn.workers.UvicornWorker \
+#     "${app_entrypoint}"
+
 exec start-stop-daemon --start -c root:root --exec \
-     /opt/sunet/venv/bin/gunicorn \
-     --pidfile "${state_dir}/${app_name}.pid" -- \
-     --bind 0.0.0.0:8080 \
-     --workers "${workers}" \
-     --worker-class "${worker_class}" \
-     --threads "${worker_threads}" \
-     --timeout "${worker_timeout}" \
-     --access-logfile "${log_dir}/${app_name}-access.log" \
-     --error-logfile "${log_dir}/${app_name}-error.log" \
-     --capture-output \
-      -k uvicorn.workers.UvicornWorker \
-     "${app_entrypoint}"
+     /opt/sunet/venv/bin/python \
+     --pidfile py_pdfsigner.pid --\
+     -m ${app_entrypoint}

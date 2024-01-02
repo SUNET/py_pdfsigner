@@ -5,7 +5,6 @@ set -x
 
 . /opt/sunet/venv/bin/activate
 
-
 app_entrypoint="py_pdfsigner.run:app"
 app_name="py_pdfsigner"
 base_dir="/opt/sunet"

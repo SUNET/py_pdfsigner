@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     libgdk-pixbuf2.0-0 \
     libgtk2.0-0 \
     softhsm2 \
+    libsnappy-dev \
     libpango-1.0-0
 
 RUN rm -rf /var/lib/apt/lists/*
@@ -33,7 +34,7 @@ RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/sunet
 COPY requirements.txt ./
 COPY src ./src
-COPY dockerfiles/start_dev.sh ./
+COPY dockerfiles/start_dev_queue.sh ./
 COPY dockerfiles/dev/create_and_import_pki.sh ./
 
 RUN python3 -mvenv /opt/sunet/venv
@@ -44,8 +45,8 @@ RUN mkdir -p /var/log/sunet && chmod 770 /var/log/sunet
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=27s CMD curl --max-time 20 http://localhost:8080/status | grep -q OK
+HEALTHCHECK --interval=27s CMD curl --max-time 20 http://localhost:8080/status/ | grep -q OK
 
 ENTRYPOINT [ "/bin/bash"]
 
-CMD [ "/opt/sunet/start_dev.sh" ]
+CMD [ "/opt/sunet/start_dev_queue.sh", "queue"]
