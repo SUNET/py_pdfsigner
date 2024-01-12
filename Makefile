@@ -25,15 +25,17 @@ stop:
 	$(info stopping)
 	docker-compose -f docker-compose.yaml rm -s -f
 
+hard_restart: stop start
+
 start_dev:
 	$(info Run dev!)
-	docker-compose -f docker-compose.yaml -f docker-compose_dev.yaml up -d --remove-orphans
+	docker-compose -f docker-compose_dev.yaml up -d --remove-orphans
 
 stop_dev:
 	$(info stopping dev)
 	docker-compose -f docker-compose_dev.yaml rm -s -f
 
-hard_restart: stop start
+hard_dev_restart: stop_dev start_dev
 
 ifndef VERSION
 VERSION := latest                                                                                                                                                                                                                              
@@ -43,6 +45,8 @@ DOCKER_PDFSIGNER 					:= docker.sunet.se/dc4eu/py_pdfsigner:$(VERSION)
 DOCKER_PDFSIGNER_EXTERNAL_PKCS11 	:= docker.sunet.se/dc4eu/py_pdfsigner_external_pkcs11:$(VERSION)
 DOCKER_PDFSIGNER_DEV 				:= docker.sunet.se/dc4eu/py_pdfsigner_dev:$(VERSION)
 DOCKER_PDFSIGNER_USB				:= docker.sunet.se/dc4eu/py_pdfsigner_usb:$(VERSION)
+DOCKER_PDFVALIDATOR_DEV 			:= docker.sunet.se/dc4eu/py_pdfvalidator_dev:$(VERSION)
+DOCKER_PDFSIGNER_DEV_API 			:= docker.sunet.se/dc4eu/py_pdfsigner_dev_api:$(VERSION)
 
 reformat:
 	isort --line-width 120 --atomic --project python_x509_pkcs11 $(SOURCE)
@@ -77,20 +81,33 @@ docker-build-external_pkcs11:
 	$(info building docker image $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) )
 	docker build --tag $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11) --file dockerfiles/external_pkcs11/Dockerfile .
 
-docker-build-dev:
-	$(info building docker image $(DOCKER_PDFSIGNER_DEV) )
-	docker build --tag $(DOCKER_PDFSIGNER_DEV) --file dockerfiles/dev/Dockerfile .
+docker-build-dev-api:
+	$(info building docker image $(DOCKER_PDFSIGNER_DEV_API) )
+	docker build --tag $(DOCKER_PDFSIGNER_DEV_API) --file dockerfiles/dev_api/Dockerfile .
 
 docker-build-usb:
 	$(info building docker image $(DOCKER_PDFSIGNER_USB) )
 	docker build --tag $(DOCKER_PDFSIGNER_USB) --file dockerfiles/usb/Dockerfile .
 
+docker-build-signer-dev:
+	$(info building docker image $(DOCKER_PDFSIGNER_DEV) )
+	docker build --tag $(DOCKER_PDFSIGNER_DEV) --file dockerfiles/dev/signer/Dockerfile .
+
+docker-build-validator-dev:
+	$(info building docker image $(DOCKER_PDFVALIDATOR_DEV) )
+	docker build --tag $(DOCKER_PDFVALIDATOR_DEV) --file dockerfiles/dev/validator/Dockerfile .
+
+docker-build-dev: docker-build-signer-dev docker-build-validator-dev
+
+
 docker-push:
 	$(info Pushing docker images)
 	docker push $(DOCKER_PDFSIGNER)
 	docker push $(DOCKER_PDFSIGNER_EXTERNAL_PKCS11)
-	docker push $(DOCKER_PDFSIGNER_DEV)
+	docker push $(DOCKER_PDFSIGNER_DEV_API)
 	docker push $(DOCKER_PDFSIGNER_USB)
+	docker push $(DOCKER_PDFSIGNER_DEV)
+	docker push $(DOCKER_PDFVALIDATOR_DEV)
 
 
 hard_restart: stop start

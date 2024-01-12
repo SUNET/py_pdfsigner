@@ -8,14 +8,9 @@ class PDFSignRequest(BaseModel):
     """Class to represent request"""
 
     transaction_id: str
-    field_name: str = "Signature1"
-    location: str
-    reason: str
-    contact_info: str
-    name: str
-    data: str
+    base64_data: str
 
-    @validator("data")
+    @validator("base64_data")
     def data_len(cls, v: str) -> str:
         """validate field 'data' by length"""
         if len(v) < 3:
@@ -26,7 +21,7 @@ class PDFSignReply(BaseModel):
     """Class to represent reply"""
 
     transaction_id: str
-    data: Optional[str] = None
+    base64_data: Optional[str] = None
     error: Optional[str] = None
     create_ts: Optional[int]
 
@@ -34,7 +29,7 @@ class PDFSignReply(BaseModel):
 class PDFValidateRequest(BaseModel):
     """Class to represent request"""
 
-    data: str
+    base64_data: str
 
 
 class PDFValidateReply(BaseModel):

@@ -9,6 +9,7 @@ services:
     volumes:
       - ./dev_config.yaml:/config.yaml:ro
       - /var/log/sunet:/var/log/sunet
+      - ./developer_pki/certs:/opt/sunet/pki:ro
     networks:
       - signer-net
     environment:

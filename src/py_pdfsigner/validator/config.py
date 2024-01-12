@@ -5,14 +5,16 @@ import os
 import sys
 from logging import Logger
 
+class RedisConfig(BaseModel):
+    host: str
+    port: int
+    db: int
+    password: Optional[str] = None
 
 class CFG(BaseModel):
-    pkcs11_label: str
-    pkcs11_pin: str
-    pkcs11_module: str
-    pkcs11_key_label: Optional[str] = None
-    pkcs11_cert_label: Optional[str] = None
-    pkcs11_slot: Optional[int] = None
+    validate_queue_name: str
+    trust_root_folder: str
+    redis: RedisConfig
 
 def parse(log: Logger) -> CFG:
     file_name = os.getenv("CONFIG_YAML")
@@ -23,7 +25,7 @@ def parse(log: Logger) -> CFG:
     try:
         with open(file_name, "r")as f:
              data = yaml.load(f, yaml.FullLoader)
-             cfg = CFG.model_validate(data["py_pdfsigner"])
+             cfg = CFG.model_validate(data["py_pdfvalidator"])
     except Exception as e:
             log.error(f"open file {file_name} failed, error: {e}")
             sys.exit(1)

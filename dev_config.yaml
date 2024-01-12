@@ -1,9 +1,30 @@
 ---
 
 py_pdfsigner:
-  pkcs11_pin: "1234"
-  pkcs11_module: "/usr/lib/softhsm/libsofthsm2.so"
-  pkcs11_label: "test_label"
-  pkcs11_key_label: "test_key_label"
-  pkcs11_cert_label: "test_cert_label"
-  #pkcs11_slot: 0
+  pkcs11:
+    pin: "1234"
+    module: "/usr/lib/softhsm/libsofthsm2.so"
+    label: "test_label"
+    key_label: "test_key_label"
+    cert_label: "test_cert_label"
+    #slot: 0
+  sign_queue_name: "sign"
+  add_signed_queue_name: "cache"
+  redis:
+    host: "redis"
+    port: 6379
+    db: 0
+  metadata:
+    location: "Stockholm"
+    reason: "Future validation"
+    name: "SUNET/Vetenskapsrådet"
+    contact_info: "info@sunet.se"
+    field_name: "Signature1"
+
+py_pdfvalidator:
+  validate_queue_name: "validate"
+  trust_root_folder: "/opt/sunet/pki"
+  redis:
+    host: "redis"
+    port: 6379
+    db: 0
